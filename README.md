@@ -1,2 +1,3 @@
-# k8sclient
+# FastAPI Project
 
+Generated project structure.
