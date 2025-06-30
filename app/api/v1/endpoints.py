@@ -1,8 +1,8 @@
 from fastapi import APIRouter
-from services.pod_service import get_pods_in_namespace
-from services.pod_service import read_namespaced_pod
-from services.log_service import get_pod_logs
-from services.configmap_service import get_configmaps_in_namespace
+from fastapi.responses import StreamingResponse
+from services.pod_service import *
+from services.log_service import *
+from services.configmap_service import *
 
 router = APIRouter()
 
@@ -28,6 +28,13 @@ def get_pod_logs_route(namespace: str, pod_name: str, tail_lines: int = 100):
     logs = get_pod_logs(name=pod_name, namespace=namespace, tail_lines=tail_lines)
     log_lines = logs.splitlines() if logs else []
     return {"logs": log_lines}
+
+@router.get("/namespace/{namespace}/pod/{pod_name}/logs/follow")
+def follow_pod_logs_route(namespace: str, pod_name: str):
+    def log_stream():
+        for line in follow_pod_logs(name=pod_name, namespace=namespace):
+            yield line + "\n"
+    return StreamingResponse(log_stream(), media_type="text/plain")
 
 @router.get("/namespace/{namespace}/configmaps")
 def get_configmaps_by_namespace(namespace: str):
