@@ -116,3 +116,12 @@ def format_memory(mem_str):
     except Exception:
         return mem_str
 
+def get_software_container_name(name: str, namespace: str):
+    """
+    Return a list of container names for the given pod,
+    excluding any container whose name includes 'proxy'.
+    """
+    v1 = client.CoreV1Api()
+    pod = v1.read_namespaced_pod(name=name, namespace=namespace)
+    return [container.name for container in pod.spec.containers if "proxy" not in container.name]
+

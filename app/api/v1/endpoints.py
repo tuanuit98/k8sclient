@@ -26,7 +26,8 @@ def get_pod_by_namespace_and_name(namespace: str, pod_name: str):
 @router.get("/namespace/{namespace}/pod/{pod_name}/logs")
 def get_pod_logs_route(namespace: str, pod_name: str, tail_lines: int = 100):
     logs = get_pod_logs(name=pod_name, namespace=namespace, tail_lines=tail_lines)
-    log_lines = logs.splitlines() if logs else []
+    # logs is a dict: {container_name: log_string}
+    log_lines = {container: log.splitlines() for container, log in logs.items()} if isinstance(logs, dict) else logs
     return {"logs": log_lines}
 
 @router.get("/namespace/{namespace}/pod/{pod_name}/logs/follow")
