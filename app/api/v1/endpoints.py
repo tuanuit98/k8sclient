@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, PlainTextResponse
 from services.pod_service import *
 from services.log_service import *
 from services.configmap_service import *
@@ -27,8 +27,14 @@ def get_pod_by_namespace_and_name(namespace: str, pod_name: str):
 def get_pod_logs_route(namespace: str, pod_name: str, tail_lines: int = 100):
     logs = get_pod_logs(name=pod_name, namespace=namespace, tail_lines=tail_lines)
     # logs is a dict: {container_name: log_string}
-    log_lines = {container: log.splitlines() for container, log in logs.items()} if isinstance(logs, dict) else logs
-    return {"logs": log_lines}
+    # Join all logs as plain text (if multiple containers, concatenate with header)
+    if isinstance(logs, dict):
+        plain_logs = ""
+        for container, log in logs.items():
+            plain_logs += f"===== {container} =====\n{log}\n"
+    else:
+        plain_logs = logs
+    return PlainTextResponse(plain_logs)
 
 @router.get("/namespace/{namespace}/pod/{pod_name}/logs/follow")
 def follow_pod_logs_route(namespace: str, pod_name: str):
