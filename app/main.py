@@ -2,9 +2,13 @@ import time
 start = time.time()
 from fastapi import FastAPI
 import uvicorn
+from kubernetes import config
 
 from api.v1 import endpoints
 print("Imports took", time.time() - start, "seconds")
+
+# Load kubeconfig ONCE at startup
+config.load_kube_config()
 
 app = FastAPI()
 

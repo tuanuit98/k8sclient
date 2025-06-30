@@ -1,22 +1,12 @@
-from kubernetes import client, config
+from kubernetes import client
 
-def get_pods_in_namespace(namespace: str, kube_config: str = None):
-    # Load kubeconfig from a file or default location
-    if kube_config:
-        config.load_kube_config(config_file=kube_config)
-    else:
-        config.load_kube_config()
+def get_pods_in_namespace(namespace: str):
     v1 = client.CoreV1Api()
     pods = v1.list_namespaced_pod(namespace)
     # Return only pod names
     return [pod.metadata.name for pod in pods.items]
 
-def read_namespaced_pod(name: str, namespace: str, kube_config: str = None):
-    # Load kubeconfig from a file or default location
-    if kube_config:
-        config.load_kube_config(config_file=kube_config)
-    else:
-        config.load_kube_config()
+def read_namespaced_pod(name: str, namespace: str):
     v1 = client.CoreV1Api()
     pod = v1.read_namespaced_pod(name=name, namespace=namespace)
 
