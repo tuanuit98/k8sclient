@@ -45,5 +45,6 @@ def follow_pod_logs_route(namespace: str, pod_name: str):
 
 @router.get("/namespace/{namespace}/configmaps")
 def get_configmaps_by_namespace(namespace: str):
-    configmaps = get_configmaps_in_namespace(namespace)
-    return {"namespace": namespace, "configmaps": configmaps}
+    from services.configmap_service import get_configmaps_in_namespace_plain
+    configmaps_plain = get_configmaps_in_namespace_plain(namespace)
+    return PlainTextResponse(configmaps_plain)
