@@ -3,6 +3,8 @@ from fastapi.responses import StreamingResponse, PlainTextResponse
 from services.pod_service import *
 from services.log_service import *
 from services.configmap_service import *
+from services.namespace_service import *
+import time
 
 router = APIRouter()
 
@@ -39,7 +41,10 @@ def get_pod_logs_route(namespace: str, pod_name: str, tail_lines: int = 100):
 @router.get("/namespace/{namespace}/pod/{pod_name}/logs/follow")
 def follow_pod_logs_route(namespace: str, pod_name: str):
     def log_stream():
+        start_time = time.time()
         for line in follow_pod_logs(name=pod_name, namespace=namespace):
+            if time.time() - start_time > 90:
+                break
             yield line + "\n"
     return StreamingResponse(log_stream(), media_type="text/plain")
 
@@ -48,3 +53,8 @@ def get_configmaps_by_namespace(namespace: str):
     from services.configmap_service import get_configmaps_in_namespace_plain
     configmaps_plain = get_configmaps_in_namespace_plain(namespace)
     return PlainTextResponse(configmaps_plain)
+
+@router.get("/namespaces")
+def list_namespaces():
+    namespaces = get_namespaces()
+    return {"namespaces": namespaces}
