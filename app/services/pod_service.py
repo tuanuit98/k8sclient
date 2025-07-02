@@ -1,10 +1,37 @@
 from kubernetes import client
+from datetime import datetime, timezone
 
 def get_pods_in_namespace(namespace: str):
     v1 = client.CoreV1Api()
     pods = v1.list_namespaced_pod(namespace)
-    # Return only pod names
-    return [pod.metadata.name for pod in pods.items]
+    pod_list = []
+    for pod in pods.items:
+        # Count ready containers
+        ready = 0
+        total = len(pod.status.container_statuses) if pod.status.container_statuses else 0
+        if pod.status.container_statuses:
+            for cs in pod.status.container_statuses:
+                if cs.ready:
+                    ready += 1
+        # Pod status
+        status = pod.status.phase
+        # Restarts (sum for all containers)
+        restarts = sum(cs.restart_count for cs in pod.status.container_statuses) if pod.status.container_statuses else 0
+        # Age (in days)
+        start_time = pod.status.start_time
+        if start_time:
+            age_days = (datetime.now(timezone.utc) - start_time).days
+            age_str = f"{age_days}d"
+        else:
+            age_str = "N/A"
+        pod_list.append({
+            "name": pod.metadata.name,
+            "ready": f"{ready}/{total}",
+            "status": status,
+            "restarts": restarts,
+            "age": age_str
+        })
+    return pod_list
 
 def read_namespaced_pod(name: str, namespace: str):
     v1 = client.CoreV1Api()

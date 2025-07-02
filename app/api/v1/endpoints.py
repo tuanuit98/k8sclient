@@ -1,10 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse, PlainTextResponse
+from fastapi.templating import Jinja2Templates
 from services.pod_service import *
 from services.log_service import *
 from services.configmap_service import *
 from services.namespace_service import *
 import time
+
+templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
@@ -16,14 +19,17 @@ def read_root():
     return {"pods": pod_names}
 
 @router.get("/namespace/{namespace}/pods")
-def get_pods_by_namespace(namespace: str):
-    pod_names = get_pods_in_namespace(namespace)
-    return {"namespace": namespace, "pods": pod_names}
+def get_pods_by_namespace(request: Request, namespace: str):
+    pod_list = get_pods_in_namespace(namespace)
+    return templates.TemplateResponse("pods.html", {"request": request, "namespace": namespace, "pods": pod_list})
 
 @router.get("/namespace/{namespace}/pod/{pod_name}")
-def get_pod_by_namespace_and_name(namespace: str, pod_name: str):
+def get_pod_by_namespace_and_name(request: Request, namespace: str, pod_name: str):
     pod_details = read_namespaced_pod(pod_name, namespace)
-    return {"pod_details": pod_details}
+    return templates.TemplateResponse(
+        "pod_detail.html",
+        {"request": request, "namespace": namespace, "pod_details": pod_details},
+    )
 
 @router.get("/namespace/{namespace}/pod/{pod_name}/logs")
 def get_pod_logs_route(namespace: str, pod_name: str, tail_lines: int = 100):
@@ -58,3 +64,6 @@ def get_configmaps_by_namespace(namespace: str):
 def list_namespaces():
     namespaces = get_namespaces()
     return {"namespaces": namespaces}
+
+
+

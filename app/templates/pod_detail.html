@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pod Detail - {{ pod_details.name }}</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom right, #f0f2f5, #e6ecf0);
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      color: #333;
+      user-select: none;
+    }
+
+    body {
+      padding: 40px 16px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      padding: 32px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 28px;
+      color: #1976d2;
+      border-bottom: 2px solid #1976d2;
+      padding-bottom: 8px;
+    }
+
+    .info-pair {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-pair:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .info-value {
+      color: #222;
+      text-align: right;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background-color: #eeeeee;
+      border-radius: 999px;
+      font-size: 13px;
+      margin: 4px 4px 0 0;
+      color: #444;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.04);
+    }
+
+    .status {
+      background-color: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .status.Failed {
+      background-color: #ffcdd2;
+      color: #c62828;
+    }
+
+    .status.Pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .card {
+      background-color: #f9fbfd;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: inset 0 0 0 1px #e0e0e0;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-weight: bold;
+      color: #1976d2;
+      margin-bottom: 12px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      user-select: text;
+    }
+
+    .table th, .table td {
+      text-align: left;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .table th {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .table tr:hover {
+      background-color: #eef9ff;
+    }
+
+    @media (max-width: 600px) {
+      .info-pair {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .info-value {
+        text-align: left;
+        margin-top: 4px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body tabindex="-1">
+  <div class="container">
+    <h2>Pod: {{ pod_details.name }}</h2>
+
+    <!-- Metadata -->
+    <div class="card">
+      <div class="card-title">Metadata</div>
+      <div class="info-pair"><div class="info-label">Namespace</div><div class="info-value">{{ pod_details.namespace }}</div></div>
+      <div class="info-pair"><div class="info-label">Status</div>
+        <div class="info-value"><span class="badge status {{ pod_details.status }}">{{ pod_details.status }}</span></div>
+      </div>
+      <div class="info-pair"><div class="info-label">Node</div><div class="info-value">{{ pod_details.node_name }}</div></div>
+      <div class="info-pair"><div class="info-label">Start Time</div><div class="info-value">{{ pod_details.start_time }}</div></div>
+      <div class="info-pair"><div class="info-label">Host IP</div><div class="info-value">{{ pod_details.host_ip }}</div></div>
+      <div class="info-pair"><div class="info-label">Pod IP</div><div class="info-value">{{ pod_details.pod_ip }}</div></div>
+    </div>
+
+    <!-- Labels -->
+    <div class="card">
+      <div class="card-title">Labels</div>
+      {% for key, value in pod_details.labels.items() %}
+        <span class="badge">{{ key }}={{ value }}</span>
+      {% endfor %}
+    </div>
+
+    <!-- Annotations -->
+    <div class="card">
+      <div class="card-title">Annotations</div>
+      {% if pod_details.annotations %}
+        {% for key, value in pod_details.annotations.items() %}
+          <span class="badge">{{ key }}={{ value }}</span>
+        {% endfor %}
+      {% else %}
+        <span class="badge">No annotations</span>
+      {% endif %}
+    </div>
+
+    <!-- Containers -->
+    <div class="card">
+      <div class="card-title">Containers</div>
+      {% for container in pod_details.containers %}
+        <div class="info-pair"><div class="info-label">Name</div><div class="info-value">{{ container.name }}</div></div>
+        <div class="info-pair"><div class="info-label">Image</div><div class="info-value">{{ container.image }}</div></div>
+
+        <div class="info-pair"><div class="info-label">CPU (Request)</div><div class="info-value">{{ container.resources.requests.cpu or '—' }}</div></div>
+        <div class="info-pair"><div class="info-label">Memory (Request)</div><div class="info-value">{{ container.resources.requests.memory or '—' }}</div></div>
+
+        <div class="info-pair"><div class="info-label">CPU (Limit)</div><div class="info-value">{{ container.resources.limits.cpu or '—' }}</div></div>
+        <div class="info-pair"><div class="info-label">Memory (Limit)</div><div class="info-value">{{ container.resources.limits.memory or '—' }}</div></div>
+
+        <div class="info-pair"><div class="info-label">CPU (Current)</div><div class="info-value">{{ container.resources.current.cpu or '—' }}</div></div>
+        <div class="info-pair"><div class="info-label">Memory (Current)</div><div class="info-value">{{ container.resources.current.memory or '—' }}</div></div>
+
+        {% if not loop.last %}
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;" />
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- Conditions -->
+    <div class="card">
+      <div class="card-title">Conditions</div>
+      {% if pod_details.conditions %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Last Transition Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cond in pod_details.conditions %}
+          <tr>
+            <td>{{ cond.type }}</td>
+            <td>{{ cond.status }}</td>
+            <td>{{ cond.last_transition_time or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p>No conditions found.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
