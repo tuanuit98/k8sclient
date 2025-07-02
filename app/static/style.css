@@ -170,6 +170,12 @@ main {
     font-weight: bold;
 }
 
+/* Red status for Error pods */
+.pod-status-error {
+    color: #dc2626; /* Tailwind's red-600 */
+    font-weight: bold;
+}
+
 /* Style pod row like namespace-item */
 .pods-table tr {
     background-color: #e2e8f0;
