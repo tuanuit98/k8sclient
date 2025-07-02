@@ -1,0 +1,346 @@
+/* Reset & Body */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f9f9f9;
+}
+
+/* Header */
+.site-header {
+    background-color: #1e293b;
+    padding: 1rem;
+    text-align: center;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.site-header .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logo a {
+    color: white;
+    text-decoration: none;
+}
+
+/* Main Layout */
+main {
+    padding: 2rem;
+}
+
+/* Namespace Section Wrapper */
+.namespace-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+}
+
+.namespace-wrapper h2 {
+    text-align: center;
+    color: #334155;
+}
+
+/* Search Box */
+#searchBox {
+    display: block;
+    width: 100%;
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    font-size: 1.05rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+/* Namespace List */
+.namespace-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    width: 100%;
+}
+
+.namespace-item {
+    background-color: #e2e8f0;
+    margin: 0.75rem 0;
+    padding: 1.25rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    transition: background-color 0.2s;
+    word-break: break-word;
+}
+
+.namespace-item:hover {
+    background-color: #cbd5e1;
+}
+
+.namespace-link {
+    text-decoration: none;
+    color: #1e293b;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Remove underline on hover */
+.namespace-item:hover .namespace-link {
+    text-decoration: none;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    background-color: #f1f5f9;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.page-btn.active {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.page-btn:hover:not(.active) {
+    background-color: #cbd5e1;
+}
+
+/* Body Wrapper (was Pods Wrapper) */
+.body-wrapper {
+    max-width: 1000px;
+    margin: 2rem auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30,41,59,0.08);
+    padding: 2rem;
+}
+
+.pods-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+}
+
+.pods-table th, .pods-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.pods-table th {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: bold;
+}
+
+.pod-link {
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: bold;           /* Make pod name bold */
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: color 0.2s;
+}
+
+.pod-link:hover {
+    color: #0f172a;
+    text-decoration: none;
+}
+
+/* Green status for Running pods */
+.pod-status-running {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+/* Style pod row like namespace-item */
+.pods-table tr {
+    background-color: #e2e8f0;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.pods-table tr:hover {
+    background-color: #cbd5e1;
+}
+
+.pods-table td, .pods-table th {
+    border: none;
+}
+
+/* Optional: Add spacing between rows */
+.pods-table tbody tr + tr {
+    border-top: 8px solid #fff;
+}
+
+.center-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2rem auto;      /* 2rem top and bottom, auto left/right */
+    padding: 2rem;          /* Match .pods-wrapper padding */
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30,41,59,0.08);
+    max-width: 1000px;
+    width: 100%;
+    gap: 1.5rem;
+    box-sizing: border-box;
+}
+
+#filterForm label {
+    margin-right: 0.5rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+#filterForm select {
+    margin-right: 1.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 1rem;
+    color: #1e293b;
+    transition: border 0.2s;
+}
+
+#filterForm select:focus {
+    border: 1.5px solid #2563eb;
+    outline: none;
+}
+
+/* CMS Table */
+.cms-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30,41,59,0.08);
+}
+
+.cms-table th, .cms-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.cms-table th {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: bold;
+}
+
+.cms-table tr {
+    background-color: #e2e8f0;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.cms-table tr:hover {
+    background-color: #cbd5e1;
+}
+
+.cms-table td, .cms-table th {
+    border: none;
+}
+
+/* Optional: Add spacing between rows */
+.cms-table tbody tr + tr {
+    border-top: 8px solid #fff;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 2rem;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 700px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30,41,59,0.18);
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    position: absolute;
+    right: 1.5rem;
+    top: 1.2rem;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.pod-section {
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 1px 4px rgba(30,41,59,0.04);
+}
+.pod-header {
+    background: #e0e7ef;
+    border-left: 5px solid #2563eb;
+    margin-bottom: 2rem;
+}
+.pod-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #2563eb;
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+.pod-section:last-child {
+    margin-bottom: 0;
+}
+.pod-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+}
+.kv-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+}

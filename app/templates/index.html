@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Cards Microservice{% endblock %}
+
+{% block content %}
+<div class="body-wrapper">
+    <div class="pods-wrapper">
+        <div class="pods-header-bar" style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+            <form id="filterForm" style="display: flex; align-items: center; gap: 1rem;">
+                <label for="namespaceSelect">Namespace:</label>
+                <select id="namespaceSelect" name="namespace">
+                    {% for ns in namespaces %}
+                        <option value="{{ ns }}" {% if ns == selected_namespace %}selected{% endif %}>{{ ns }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="resourceTypeSelect">Resource Type:</label>
+                <select id="resourceTypeSelect" name="resource_type">
+                    <option value="pods" selected>Pods</option>
+                    <option value="configmaps">ConfigMaps</option>
+                </select>
+            </form>
+        </div>
+        <table class="pods-table" id="podsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Ready</th>
+                    <th>Status</th>
+                    <th>Restarts</th>
+                    <th>Age</th>
+                </tr>
+            </thead>
+            <tbody id="podsTableBody">
+                {% for pod in pods %}
+                <tr data-status="{{ pod.status }}">
+                    <td>
+                        <span class="pod-link">{{ pod.name }}</span>
+                    </td>
+                    <td>{{ pod.ready }}</td>
+                    <td>
+                        {% if pod.status == "Running" %}
+                            <span class="pod-status-running">{{ pod.status }}</span>
+                        {% else %}
+                            {{ pod.status }}
+                        {% endif %}
+                    </td>
+                    <td>{{ pod.restarts }}</td>
+                    <td>{{ pod.age }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <table class="cms-table" id="cmsTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Data</th>
+                    <th>Age</th>
+                </tr>
+            </thead>
+            <tbody id="cmsTableBody">
+                <!-- ConfigMaps will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="configMapModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeModalBtn">&times;</span>
+            <pre id="configMapJson" style="white-space:pre-wrap; word-break:break-all;"></pre>
+        </div>
+    </div>
+
+    <div id="podModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closePodModalBtn">&times;</span>
+            <div id="podReport"></div>
+        </div>
+    </div>
+
+    <script>
+        function renderPodsTable(pods, ns) {
+            const tbody = document.getElementById('podsTableBody');
+            tbody.innerHTML = '';
+            pods.forEach(pod => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-status', pod.status);
+                tr.style.cursor = "pointer";
+
+                const podLink = `<span class="pod-link">${pod.name}</span>`;
+                const statusCell = pod.status === "Running"
+                    ? `<span class="pod-status-running">${pod.status}</span>`
+                    : pod.status;
+
+                tr.innerHTML = `
+                    <td>${podLink}</td>
+                    <td>${pod.ready}</td>
+                    <td>${statusCell}</td>
+                    <td>${pod.restarts}</td>
+                    <td>${pod.age}</td>
+                `;
+                tr.addEventListener('click', () => {
+                    showPodModal(ns, pod.name);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderConfigMapsTable(configmaps) {
+            const tbody = document.getElementById('cmsTableBody');
+            tbody.innerHTML = '';
+            configmaps.forEach(cm => {
+                const dataCount = cm.data ? Object.keys(cm.data).length : 0;
+                const tr = document.createElement('tr');
+                tr.style.cursor = "pointer";
+                tr.innerHTML = `
+                    <td>${cm.name}</td>
+                    <td>${dataCount}</td>
+                    <td>${cm.age || ''}</td>
+                `;
+                tr.addEventListener('click', () => {
+                    showConfigMapModal(cm);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateTables() {
+            const ns = document.getElementById('namespaceSelect').value;
+            const resourceType = document.getElementById('resourceTypeSelect').value;
+            const podsTable = document.getElementById('podsTable');
+            const cmsTable = document.getElementById('cmsTable');
+
+            if (resourceType === "pods") {
+                podsTable.style.display = "";
+                cmsTable.style.display = "none";
+                fetch(`/namespace/${encodeURIComponent(ns)}/pods`)
+                    .then(response => response.json())
+                    .then(data => renderPodsTable(data.pods, ns));
+            } else if (resourceType === "configmaps") {
+                podsTable.style.display = "none";
+                cmsTable.style.display = "";
+                fetch(`/namespace/${encodeURIComponent(ns)}/configmaps`)
+                    .then(response => response.json())
+                    .then(data => renderConfigMapsTable(data.configmaps));
+            }
+        }
+
+        document.getElementById('namespaceSelect').addEventListener('change', updateTables);
+        document.getElementById('resourceTypeSelect').addEventListener('change', updateTables);
+
+        function showConfigMapModal(cm) {
+            const modal = document.getElementById('configMapModal');
+            const pre = document.getElementById('configMapJson');
+            pre.textContent = JSON.stringify(cm, null, 2);
+            modal.style.display = "block";
+        }
+
+        function showPodModal(ns, podName) {
+            fetch(`/namespace/${encodeURIComponent(ns)}/pod/${encodeURIComponent(podName)}/fragment`)
+                .then(response => response.text())
+                .then(html => {
+                    const modal = document.getElementById('podModal');
+                    const report = document.getElementById('podReport');
+                    report.innerHTML = html;
+                    modal.style.display = "block";
+                });
+        }
+
+        document.getElementById('closeModalBtn').onclick = function() {
+            document.getElementById('configMapModal').style.display = "none";
+        };
+
+        document.getElementById('closePodModalBtn').onclick = function() {
+            document.getElementById('podModal').style.display = "none";
+        };
+
+        window.onclick = function(event) {
+            const podModal = document.getElementById('podModal');
+            const configMapModal = document.getElementById('configMapModal');
+            if (event.target === podModal) {
+                podModal.style.display = "none";
+            }
+            if (event.target === configMapModal) {
+                configMapModal.style.display = "none";
+            }
+        }
+
+        // Attach click event to initial pod rows rendered by Jinja
+        document.querySelectorAll('#podsTableBody tr').forEach(tr => {
+            const podName = tr.querySelector('.pod-link').textContent;
+            const ns = document.getElementById('namespaceSelect').value;
+            tr.style.cursor = "pointer";
+            tr.addEventListener('click', () => {
+                showPodModal(ns, podName);
+            });
+        });
+    </script>
+</div>
+{% endblock %}

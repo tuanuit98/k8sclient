@@ -12,24 +12,30 @@ templates = Jinja2Templates(directory="app/templates")
 router = APIRouter()
 
 @router.get("/")
-def read_root():
-    pod_names = get_pods_in_namespace(namespace="default")
-    for name in pod_names:
-        print(name)
-    return {"pods": pod_names}
+def read_root(request: Request):
+    namespaces = get_namespaces()
+    selected_namespace = "default"
+    pods = get_pods_in_namespace(selected_namespace)
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "namespaces": namespaces,
+            "pods": pods,
+            "selected_namespace": selected_namespace,
+        }
+    )
 
 @router.get("/namespace/{namespace}/pods")
-def get_pods_by_namespace(request: Request, namespace: str):
+def get_pods_by_namespace(namespace: str):
     pod_list = get_pods_in_namespace(namespace)
-    return templates.TemplateResponse("pods.html", {"request": request, "namespace": namespace, "pods": pod_list})
+    return {"pods": pod_list}
 
 @router.get("/namespace/{namespace}/pod/{pod_name}")
-def get_pod_by_namespace_and_name(request: Request, namespace: str, pod_name: str):
+def get_pod_by_namespace_and_name(namespace: str, pod_name: str):
     pod_details = read_namespaced_pod(pod_name, namespace)
-    return templates.TemplateResponse(
-        "pod_detail.html",
-        {"request": request, "namespace": namespace, "pod_details": pod_details},
-    )
+    return pod_details
+
 
 @router.get("/namespace/{namespace}/pod/{pod_name}/logs")
 def get_pod_logs_route(namespace: str, pod_name: str, tail_lines: int = 100):
@@ -56,14 +62,13 @@ def follow_pod_logs_route(namespace: str, pod_name: str):
 
 @router.get("/namespace/{namespace}/configmaps")
 def get_configmaps_by_namespace(namespace: str):
-    from services.configmap_service import get_configmaps_in_namespace_plain
-    configmaps_plain = get_configmaps_in_namespace_plain(namespace)
-    return PlainTextResponse(configmaps_plain)
+    configmaps = get_configmaps_in_namespace(namespace)
+    return {"configmaps": configmaps}
 
-@router.get("/namespaces")
-def list_namespaces():
-    namespaces = get_namespaces()
-    return {"namespaces": namespaces}
-
-
-
+@router.get("/namespace/{namespace}/pod/{pod_name}/fragment")
+def get_pod_by_namespace_and_name(request: Request, namespace: str, pod_name: str):
+    pod_details = read_namespaced_pod(pod_name, namespace)
+    return templates.TemplateResponse(
+        "pod_detail.html",
+        {"request": request, "namespace": namespace, "pod_details": pod_details},
+    )

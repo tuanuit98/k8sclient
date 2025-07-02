@@ -88,13 +88,26 @@ def read_namespaced_pod(name: str, namespace: str):
             if "memory" in container.resources.limits:
                 limits["memory"] = container.resources.limits["memory"]
 
+        # Set to None if empty
+        requests_out = requests if requests else None
+        limits_out = limits if limits else None
+        current_out = current_usage.get(container.name, {})
+        if not current_out or not any(current_out.values()):
+            current_out = {"cpu": None, "memory": None}
+        else:
+            # Ensure both keys exist and set to None if missing
+            current_out = {
+                "cpu": current_out.get("cpu", None),
+                "memory": current_out.get("memory", None)
+            }
+
         container_info = {
             "name": container.name,
             "image": container.image,
             "resources": {
-                "requests": requests,
-                "limits": limits,
-                "current": current_usage.get(container.name, {})
+                "requests": requests_out if requests_out else {"cpu": None, "memory": None},
+                "limits": limits_out if limits_out else {"cpu": None, "memory": None},
+                "current": current_out
             }
         }
         pod_details["containers"].append(container_info)
@@ -151,4 +164,5 @@ def get_software_container_name(name: str, namespace: str):
     v1 = client.CoreV1Api()
     pod = v1.read_namespaced_pod(name=name, namespace=namespace)
     return [container.name for container in pod.spec.containers if "proxy" not in container.name]
+
 

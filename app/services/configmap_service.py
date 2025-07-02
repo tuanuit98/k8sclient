@@ -1,13 +1,19 @@
 from kubernetes import client
+import yaml
+from datetime import datetime, timezone
 
 def get_configmaps_in_namespace(namespace: str):
     v1 = client.CoreV1Api()
     configmaps = v1.list_namespaced_config_map(namespace)
-    # Return a list of configmap names and their data
+    # Return a list of configmap names, their data, and age
     return [
         {
             "name": cm.metadata.name,
-            "data": cm.data
+            "data": cm.data,
+            "age": (
+                f"{(datetime.now(timezone.utc) - cm.metadata.creation_timestamp).days}d"
+                if cm.metadata.creation_timestamp else "N/A"
+            )
         }
         for cm in configmaps.items
     ]
@@ -28,3 +34,9 @@ def get_configmaps_in_namespace_plain(namespace: str):
             plain += "(empty)\n"
         plain += "\n"
     return plain
+
+def get_configmap_yaml(namespace: str, name: str):
+    v1 = client.CoreV1Api()
+    cm = v1.read_namespaced_config_map(name, namespace)
+    cm_dict = cm.to_dict()
+    return yaml.dump(cm_dict, sort_keys=False)
