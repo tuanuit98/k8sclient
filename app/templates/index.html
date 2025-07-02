@@ -5,7 +5,7 @@
 {% block content %}
 <div class="body-wrapper">
     <div class="pods-wrapper">
-        <div class="pods-header-bar" style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+        <div class="pods-header-bar" style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; justify-content: space-between;">
             <form id="filterForm" style="display: flex; align-items: center; gap: 1rem;">
                 <label for="namespaceSelect">Namespace:</label>
                 <select id="namespaceSelect" name="namespace">
@@ -20,6 +20,13 @@
                     <option value="configmaps">ConfigMaps</option>
                 </select>
             </form>
+            <button type="button" id="refreshBtn" title="Refresh" style="background:none;border:none;cursor:pointer;padding:0 0.5em;">
+                <svg xmlns="http://www.w3.org/2000/svg" height="22" width="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0114.13-3.36L23 10M1 14l5.36 5.36A9 9 0 0020.49 15"></path>
+                </svg>
+            </button>
         </div>
         <table class="pods-table" id="podsTable">
             <thead>
@@ -29,6 +36,7 @@
                     <th>Status</th>
                     <th>Restarts</th>
                     <th>Age</th>
+                    <th>Logs</th>
                 </tr>
             </thead>
             <tbody id="podsTableBody">
@@ -47,6 +55,9 @@
                     </td>
                     <td>{{ pod.restarts }}</td>
                     <td>{{ pod.age }}</td>
+                    <td>
+                        <span class="show-log-link" data-pod="{{ pod.name }}">Show log</span>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -99,10 +110,23 @@
                     <td>${statusCell}</td>
                     <td>${pod.restarts}</td>
                     <td>${pod.age}</td>
+                    <td>
+                        <span class="show-log-link" data-pod="${pod.name}">Show log</span>
+                    </td>
                 `;
                 tr.addEventListener('click', () => {
                     showPodModal(ns, pod.name);
                 });
+
+                // Attach the log link event here!
+                const logLink = tr.querySelector('.show-log-link');
+                if (logLink) {
+                    logLink.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        showPodLogModal(ns, this.getAttribute('data-pod'));
+                    });
+                }
+
                 tbody.appendChild(tr);
             });
         }
@@ -195,7 +219,36 @@
             tr.addEventListener('click', () => {
                 showPodModal(ns, podName);
             });
+            // Prevent modal when clicking "Show log"
+            const logLink = tr.querySelector('.show-log-link');
+            if (logLink) {
+                logLink.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showPodLogModal(ns, this.getAttribute('data-pod'));
+                });
+            }
         });
+
+        // Example showPodLogModal function (implement your modal as needed)
+        function showPodLogModal(ns, podName) {
+            window.open(`/namespace/${encodeURIComponent(ns)}/pod/${encodeURIComponent(podName)}/logs/follow`, '_blank');
+        }
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            const ns = document.getElementById('namespaceSelect').value;
+            const resourceType = document.getElementById('resourceTypeSelect').value;
+            if (resourceType === "pods") {
+                fetch(`/namespace/${encodeURIComponent(ns)}/pods`)
+                    .then(response => response.json())
+                    .then(data => renderPodsTable(data.pods, ns));
+            } else if (resourceType === "configmaps") {
+                fetch(`/namespace/${encodeURIComponent(ns)}/configmaps`)
+                    .then(response => response.json())
+                    .then(data => renderConfigMapsTable(data.configmaps));
+            }
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', updateTables);
     </script>
 </div>
 {% endblock %}

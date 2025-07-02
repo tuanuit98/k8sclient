@@ -344,3 +344,55 @@ main {
     margin-bottom: 1.5rem;
     font-size: 1.05rem;
 }
+
+.show-log-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: #2563eb !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 0.35em 1em !important;
+    font-weight: bold !important;
+    font-family: inherit !important;
+    font-size: 1rem !important;
+    cursor: pointer !important;
+    transition: background 0.2s;
+    outline: none !important;
+    box-shadow: none !important;
+    text-align: center !important;
+    display: inline-block !important;
+}
+.show-log-btn:hover,
+.show-log-btn:focus {
+    background: #1d4ed8 !important;
+}
+
+button {
+    appearance: auto;
+    color: buttontext;
+    background-color: buttonface;
+}
+
+.show-log-link {
+    color: #2563eb;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: color 0.2s;
+}
+.show-log-link:hover,
+.show-log-link:focus {
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
+#refreshBtn svg {
+    transition: transform 0.2s;
+}
+#refreshBtn:hover svg {
+    transform: rotate(-90deg) scale(1.1);
+}
+
