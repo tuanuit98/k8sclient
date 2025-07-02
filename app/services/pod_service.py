@@ -61,7 +61,7 @@ def read_namespaced_pod(name: str, namespace: str):
     pod_details = {
         "name": pod.metadata.name,
         "namespace": pod.metadata.namespace,
-        "status": pod.status.phase,
+        "status": get_pod_status(pod),
         "node_name": pod.spec.node_name,
         "start_time": str(pod.status.start_time),
         "containers": [],
@@ -164,5 +164,18 @@ def get_software_container_name(name: str, namespace: str):
     v1 = client.CoreV1Api()
     pod = v1.read_namespaced_pod(name=name, namespace=namespace)
     return [container.name for container in pod.spec.containers if "proxy" not in container.name]
+
+# Example: get the most relevant status for the pod
+def get_pod_status(pod):
+    # If any container is waiting with a reason, return that reason
+    if pod.status.container_statuses:
+        for cs in pod.status.container_statuses:
+            state = cs.state
+            if state.waiting and state.waiting.reason:
+                return state.waiting.reason
+            if state.terminated and state.terminated.reason:
+                return state.terminated.reason
+    # Otherwise, fall back to the phase
+    return pod.status.phase
 
 
